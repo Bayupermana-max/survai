@@ -1,0 +1,239 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hasil Survai Kepala UPT Pertamanan dan Pemakaman Kota Cirebon</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 20px;
+            background-color: #f4f4f9;
+        }
+        form {
+            max-width: 600px;
+            margin: auto;
+            background: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        label {
+            display: block;
+            margin: 10px 0 5px;
+        }
+        input, select {
+            width: 100%;
+            padding: 8px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .saved-data {
+            max-width: 100%;
+            margin: 20px auto;
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+            background-color: #fff;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+        table, th, td {
+            border: 1px solid #ccc;
+        }
+        th, td {
+            padding: 8px;
+            text-align: left;
+        }
+        .delete-btn, .pdf-btn {
+            background-color: #e74c3c;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        .delete-btn:hover, .pdf-btn:hover {
+            background-color: #c0392b;
+        }
+        .header {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 20px;
+        }
+        .header img {
+            max-width: 50px;
+            margin-right: 20px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.4.0/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.13/jspdf.plugin.autotable.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <img src="cropped-logo-dprkp-512-e1711681317953-1.JPG.png" alt="cropped-logo-dprkp-512-e1711681317953-1.JPG">
+        <h1>Hasil Survai Kepala UPT Pertamanan dan Pemakaman Kota Cirebon</h1>
+    </div>
+    <form id="permohonanForm">
+        <label for="tanggalSurvai">Tanggal Survai</label>
+        <input type="date" id="tanggalSurvai" name="tanggalSurvai" required>
+
+        <label for="namaPemohon">Nama Pemohon</label>
+        <input type="text" id="namaPemohon" name="namaPemohon" required>
+
+        <label for="perihalSurat">Perihal Surat</label>
+        <input type="text" id="perihalSurat" name="perihalSurat" required>
+
+        <label for="fotoSurat">Foto Surat</label>
+        <input type="file" id="fotoSurat" name="fotoSurat" accept="image/*" required>
+
+        <label for="fotoPohon">Foto Pohon</label>
+        <input type="file" id="fotoPohon" name="fotoPohon" accept="image/*" required>
+
+        <label for="keteranganUPT">Keterangan Kepala UPT PP</label>
+        <input type="text" id="keteranganUPT" name="keteranganUPT" required>
+
+        <label for="aksi">Aksi</label>
+        <input type="text" id="aksi" name="aksi" required>
+
+        <label for="jadwalRkh">Masuk Jadwal RKH</label>
+        <input type="date" id="jadwalRkh" name="jadwalRkh" required>
+
+        <button type="submit">Simpan</button>
+    </form>
+
+    <div class="saved-data" id="savedDataContainer">
+        <h2>Data yang disimpan:</h2>
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>Tanggal Survai</th>
+                    <th>Nama Pemohon</th>
+                    <th>Perihal Surat</th>
+                    <th>Foto Surat</th>
+                    <th>Foto Pohon</th>
+                    <th>Keterangan Kepala UPT PP</th>
+                    <th>Aksi</th>
+                    <th>Masuk Jadwal RKH</th>
+                    <th>Hapus</th>
+                    <th>Cetak PDF</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- Data rows will be inserted here -->
+            </tbody>
+        </table>
+    </div>
+
+    <script>
+        document.getElementById('permohonanForm').addEventListener('submit', function(event) {
+            event.preventDefault();
+            
+            const formData = {
+                tanggalSurvai: document.getElementById('tanggalSurvai').value,
+                namaPemohon: document.getElementById('namaPemohon').value,
+                perihalSurat: document.getElementById('perihalSurat').value,
+                fotoSurat: document.getElementById('fotoSurat').files[0] ? URL.createObjectURL(document.getElementById('fotoSurat').files[0]) : '',
+                fotoPohon: document.getElementById('fotoPohon').files[0] ? URL.createObjectURL(document.getElementById('fotoPohon').files[0]) : '',
+                keteranganUPT: document.getElementById('keteranganUPT').value,
+                aksi: document.getElementById('aksi').value,
+                jadwalRkh: document.getElementById('jadwalRkh').value
+            };
+
+            let savedData = JSON.parse(localStorage.getItem('formData')) || [];
+            savedData.push(formData);
+            localStorage.setItem('formData', JSON.stringify(savedData));
+            alert('Form berhasil disimpan!');
+            displaySavedData();
+        });
+
+        // Function to display saved data
+        function displaySavedData() {
+            const savedData = JSON.parse(localStorage.getItem('formData')) || [];
+            const dataTableBody = document.getElementById('dataTable').getElementsByTagName('tbody')[0];
+            dataTableBody.innerHTML = ''; // Clear existing rows
+
+            savedData.forEach((data, index) => {
+                const row = dataTableBody.insertRow();
+                row.insertCell(0).innerText = data.tanggalSurvai;
+                row.insertCell(1).innerText = data.namaPemohon;
+                row.insertCell(2).innerText = data.perihalSurat;
+                row.insertCell(3).innerHTML = data.fotoSurat ? `<img src="${data.fotoSurat}" alt="Foto Surat" style="width: 50px; height: auto;">` : '';
+                row.insertCell(4).innerHTML = data.fotoPohon ? `<img src="${data.fotoPohon}" alt="Foto Pohon" style="width: 50px; height: auto;">` : '';
+                row.insertCell(5).innerText = data.keteranganUPT;
+                row.insertCell(6).innerText = data.aksi;
+                row.insertCell(7).innerText = data.jadwalRkh;
+                const deleteCell = row.insertCell(8);
+                const deleteButton = document.createElement('button');
+                deleteButton.innerText = 'Hapus';
+                deleteButton.className = 'delete-btn';
+                deleteButton.onclick = function() {
+                    deleteData(index);
+                };
+                deleteCell.appendChild(deleteButton);
+
+                const pdfCell = row.insertCell(9);
+                const pdfButton = document.createElement('button');
+                pdfButton.innerText = 'Cetak PDF';
+                pdfButton.className = 'pdf-btn';
+                pdfButton.onclick = function() {
+                    generatePDF([data]);
+                };
+                pdfCell.appendChild(pdfButton);
+            });
+        }
+
+        // Function to delete data
+        function deleteData(index) {
+            let savedData = JSON.parse(localStorage.getItem('formData')) || [];
+            savedData.splice(index, 1);
+            localStorage.setItem('formData', JSON.stringify(savedData));
+            displaySavedData();
+        }
+
+        // Function to generate PDF
+        function generatePDF(dataArray) {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+
+            doc.text("Data yang disimpan", 10, 10);
+
+            doc.autoTable({
+                head: [['Tanggal Survai', 'Nama Pemohon', 'Perihal Surat', 'Keterangan Kepala UPT PP', 'Aksi', 'Masuk Jadwal RKH']],
+                body: dataArray.map(data => [
+                    data.tanggalSurvai,
+                    data.namaPemohon,
+                    data.perihalSurat,
+                    data.keteranganUPT,
+                    data.aksi,
+                    data.jadwalRkh
+                ]),
+                startY: 20
+            });
+
+            doc.save("data.pdf");
+        }
+
+        // Call displaySavedData function to show saved data on page load
+        window.onload = displaySavedData;
+    </script>
+</body>
+</html>
